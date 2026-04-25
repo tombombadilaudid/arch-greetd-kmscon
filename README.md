@@ -1,10 +1,10 @@
 # arch-greetd-tuigreet-kmscon
 
-How to get kmscon working with greetd on kernel 6.19.9-arch1-1
+How to get kmscon working with greetd+tuigreet on Arch Linux
 
 
 ## installation
-Make sure to follow these steps exactly if installing manually or you'll probably have a real bad time.
+Make sure to follow these steps exactly if installing manually or you'll probably have a real bad time
 ### the lazy way:
 
 wait for me to make an install script
@@ -16,7 +16,7 @@ wait for me to make an install script
 sudo pacman -S kmscon
 ```
 \
-**2)** install greetd-tuigreet - it will pull greetd as a dependency automatically.
+**2)** install greetd-tuigreet - it will pull greetd as a dependency automatically
 ```bash
 sudo pacman -S greetd-tuigreet
 ```
@@ -27,7 +27,7 @@ sudo pacman -S greetd-tuigreet
 VT="${1#tty}"
 exec greetd --config /etc/greetd/config.toml --vt $VT
 ```
-and make it executable:
+and make it executable
 ```bash
 sudo chmod +x /etc/greetd/greetd-vt.sh
 ```
@@ -47,7 +47,7 @@ command = "tuigreet --your --style --or --feature --flags --here --cmd /etc/gree
 ACTIVE_TTY=$(cat /sys/class/tty/tty/active)
 exec sudo kmscon --vt=$ACTIVE_TTY --seats=seat0 --no-switchvt --login -- /etc/greetd/kmscon-login.sh $(whoami)
 ```
-and make it executable:
+and make it executable
 ```bash
 sudo chmod +x /etc/greetd/kmscon-session.sh
 ```
@@ -57,7 +57,7 @@ sudo chmod +x /etc/greetd/kmscon-session.sh
 #!/bin/sh
 exec /bin/login -p -f $1
 ```
-and make it executable:
+and make it executable
 ```bash
 sudo chmod +x /etc/greetd/kmscon-login.sh
 ```
@@ -70,7 +70,7 @@ while loginctl show-session $(loginctl list-sessions | awk -v vt="$1" '$5 == "tt
 done
 kill -TERM $(pgrep -f "/usr/lib/kmscon/kmscon.*--vt=tty${1}")
 ```
-and make it executable:
+and make it executable
 ```bash
 sudo chmod +x /etc/greetd/kmscon-kill.sh
 ```
@@ -81,6 +81,10 @@ sudo chmod +x /etc/greetd/kmscon-kill.sh
 . /etc/profile
 [ -f "$HOME/.bash_profile" ] && . "$HOME/.bash_profile"
 exec "$@"
+```
+and make it executable
+```bash
+sudo chmod +x /etc/greetd/session-wrapper.sh
 ```
 \
 **9)** edit your **`~/.bash_profile`** to include these lines
@@ -94,10 +98,10 @@ export PATH="$HOME/.local/bin:$PATH"
 \
 **10)** **optional(ish)** - add a logout function to your **`~/.bashrc`** or you won't be able to log out to tuigreet, kmscon will just instantly log back i>
 
-* *The example function below checks if you are currently running a display server on the session and if so it checks if it is uwsm managed before killing >
-* ***If it is uwsm managed*** it gracefully exits with **`uwsm stop`** before sending a kill signal to kmscon via **`/etc/greetd/kmscon-kill.sh`**
-* ***If it is not uwsm managed***  it checks if it is Hyprland and if so exits gracefully with **`hyprctl dispatch exit`** before sending a kill signal to >
-* ***If it is not uwsm managed and NOT Hyprland*** it will terminate the session with loginctl and then kill kmscon via **`/etc/greetd/kmscon-kill.sh`**
+* *the example function below checks if you are currently running a display server on the session and if so it checks if it is uwsm managed before killing >
+* ***if it is uwsm managed*** it gracefully exits with **`uwsm stop`** before sending a kill signal to kmscon via **`/etc/greetd/kmscon-kill.sh`**
+* ***if it is not uwsm managed***  it checks if it is Hyprland and if so exits gracefully with **`hyprctl dispatch exit`** before sending a kill signal to >
+* ***if it is not uwsm managed and NOT Hyprland*** it will terminate the session with loginctl and then kill kmscon via **`/etc/greetd/kmscon-kill.sh`**
 ```bash
 logout() {
     if [ -n "$XDG_VTNR" ] && pgrep -f "/usr/lib/kmscon/kmscon.*--vt=tty${XDG_VTNR}" > >
@@ -120,12 +124,12 @@ logout() {
 }
 ```
 \
-**11)** create a new sudoers file just for use with this setup:
+**11)** create a new sudoers file just for use with this setup
 ```bash
 sudo visudo -f /etc/sudoers.d/kmscon
 ```
 \
-now add some rules; replace username with your username:
+now add some rules; replace username with your username
 ```bash
 username ALL=(ALL) NOPASSWD: /usr/bin/kmscon
 username ALL=(ALL) NOPASSWD: /etc/greetd/kmscon-kill.sh
@@ -160,9 +164,12 @@ WantedBy=getty.target
 ```bash
 sudo ln -sf '/etc/systemd/system/greetd@.service' '/etc/systemd/system/autovt@.service'
 ```
-* you must manually enable it on tty1 even if you did the symlink above. you can enable on specific ttys this way as well.
+* now disable getty (and/or kmscon depending on whether or not you set it up prior to this)
 ```bash
 sudo systemctl disable kmsconvt@tty1.service getty@tty1.service
+```
+* you must manually enable it on tty1 even if you did the symlink above; you can enable on specific ttys this way as well
+```bash
 sudo systemctl enable greetd@tty1.service
 ```
 * now just reload and reboot
