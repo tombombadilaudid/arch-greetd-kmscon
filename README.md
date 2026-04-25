@@ -10,7 +10,7 @@ Make sure to follow these steps exactly if installing manually or you'll probabl
 * dump all the files from the greetd directory into '/etc/greetd/' and then make all the scripts executable with 'chmod +x filename.sh' 
 * place greetd@.service in '/etc/systemd/system/'
 * follow steps 1, 2, 9, 10, 11, and 13
-... or wait for me to make an install script
+\ alternatively just wait for me to make an interactive install/uninstall script
 
 ### manually:
 
